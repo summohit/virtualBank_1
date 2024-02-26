@@ -1,5 +1,5 @@
 const Router = require("express").Router();
-const upload = require("../../utils/fileUpload/profile");
+// const upload = require("../../utils/fileUpload/profile");
 const {
   createUser,
   loginUser,
@@ -16,7 +16,7 @@ Router.post("/createUser",registrationValidation, createUser);
 
 Router.put("/updateProfile",verifyKey, updateProfile);
 
-Router.post("/uploadProfileImage", verifyKey,upload.single("profileImage"), uploadProfileImage);
+// Router.post("/uploadProfileImage", verifyKey,upload.single("profileImage"), uploadProfileImage);
 
 Router.get("/getUserData", verifyKey, getUserData);
 

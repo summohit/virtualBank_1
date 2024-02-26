@@ -1,7 +1,7 @@
 const multer = require("multer");
 var fs = require("fs");
 
-var dir = "../nfs/uploadDataC";
+var dir = "./uploadDataC";
 if (!fs.existsSync(dir)) {
   fs.mkdirSync(dir, { recursive: true });
 }

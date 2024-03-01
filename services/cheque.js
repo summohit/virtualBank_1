@@ -131,3 +131,23 @@ module.exports.fillCheque = async (payload, tokenData, jwtToken) => {
     throw new customError(error, error.statusCode);
   }
 };
+
+module.exports.updateChequeStatus = async (payload, tokenData, jwtToken) => {
+  try {
+    console.log("Service: inside fillCheque");
+    let { chequeId, ...chequeData } = payload;
+    const isCheckExist = await chequeDao.getById(chequeId);
+    if (!isCheckExist) {
+      let error = "Cheque does not exist";
+      let response = createResponseObj(error, 400);
+      return response;
+    }
+    // chequeData["chequeStatus"] = 1;
+    await chequeDao.updateById(chequeId, chequeData);
+    let response = createResponseObj(null, 200, null);
+    return response;
+  } catch (error) {
+    console.log("Something went wrong: Service: blog", error);
+    throw new customError(error, error.statusCode);
+  }
+};

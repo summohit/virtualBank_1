@@ -117,22 +117,22 @@ const fillCheque = async (req, res) => {
   }
 };
 
-const uploadProfileImage = async (req, res) => {
+const updateChequeStatus = async (req, res) => {
   try {
-    console.log("Controller: inside uploadProfileImage");
-    console.log("buffer", req.file.buffer);
-    let result = await user.uploadProfileImage(
-      req.file,
+    console.log("Controller: inside fillCheque");
+    let result = await chequeService.updateChequeStatus(
+      req.body,
       req.user,
       req.headers["authorization"]
     );
+    console.log("result", result);
     if (result.statusCode == 200 || result.statusCode == 201) {
       return res
         .status(result.statusCode)
         .send(
           apiResponse.successResponse(
             result.data,
-            constants.defaultResponseMessage.UPLOADED,
+            constants.defaultResponseMessage.UPDATED,
             result.statusCode
           )
         );
@@ -173,6 +173,7 @@ module.exports = {
   createCheque,
   getChequeList,
   fillCheque,
+  updateChequeStatus,
   //   loginUser,
   //   updateProfile,
   //   getUserData,

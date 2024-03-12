@@ -24,6 +24,10 @@ const chequeSchema = new mongoose.Schema(
       default: "",
       trim: true,
     },
+    chequeNumber: {
+      type: String,
+      trim: true,
+    },
     qrcode: {
       type: String,
       default: "",

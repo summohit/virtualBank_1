@@ -31,6 +31,10 @@ const addCardSchema = new mongoose.Schema(
       type: String,
       trim: true,
     },
+    payeeName: {
+      type: String,
+      trim: true,
+    },
     status: {
       type: Number,
       default: 0,

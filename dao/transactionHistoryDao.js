@@ -1,13 +1,21 @@
 const transactionHistoryModel = require("../models/transactionHistory");
 
 
-const createCreditHistory = async (accountNumber, IfscCode,amount) => {
+const createCreditHistory = async (
+  accountNumber,
+  IfscCode,
+  amount,
+  userId,
+  payeeName
+) => {
   try {
     let data = {
       accountNumber: accountNumber,
       ifscCode: IfscCode,
-      amount:amount,
+      amount: amount,
       type: "Credit",
+      userId: userId,
+      payeeName: payeeName,
     };
     const newtransactionHistory = new transactionHistoryModel(data);
     let result = await newtransactionHistory.save();
@@ -17,13 +25,21 @@ const createCreditHistory = async (accountNumber, IfscCode,amount) => {
   }
 };
 
-const createDebitHistory = async (accountNumber, IfscCode, amount) => {
+const createDebitHistory = async (
+  accountNumber,
+  IfscCode,
+  amount,
+  userId,
+  payeeName
+) => {
   try {
     let data = {
       accountNumber: accountNumber,
       IfscCode: IfscCode,
       amount: amount,
       type: "Debit",
+      userId: userId,
+      payeeName: payeeName,
     };
     const newtransactionHistory = new transactionHistoryModel(data);
     let result = await newtransactionHistory.save();
@@ -33,4 +49,15 @@ const createDebitHistory = async (accountNumber, IfscCode, amount) => {
   }
 };
 
-module.exports = { createCreditHistory, createDebitHistory };
+const getAll = async (query) => {
+  try {
+    console.log("query", query);
+    let result = await transactionHistoryModel.aggregate(query);
+    console.log("result", result);
+    return result;
+  } catch (error) {
+    console.log(error.stack);
+  }
+};
+
+module.exports = { createCreditHistory, createDebitHistory, getAll };

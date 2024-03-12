@@ -40,8 +40,11 @@ module.exports.createCheque = async (bankNumber, tokenData, jwtToken) => {
     let payload = {
       chequeBookId: chequeBookData._id,
       bankId: bankRegisteredWithUser._id,
+      // chequeNumber:
     };
-    for (let i = 0; i < 25; i++) {
+    for (let i = 0; i < 10; i++) {
+      payload["chequeNumber"] = `"18025`+(i+1)+`"  110259008 : 066000"`;
+      console.log("payload", payload);
       let chequeData = await chequeDao.insert(payload);
       let qrCodePayload = {
         chequeStatus: chequeData.chequeStatus,

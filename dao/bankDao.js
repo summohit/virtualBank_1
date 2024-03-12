@@ -35,6 +35,7 @@ const getBankByUserIdAndStatus = async (userId, selectedFeilds) => {
 
 const getById = async (bankId, selectedFeilds) => {
   try {
+    console.log("bankId", bankId);
     let result = await bankModel
       .findOne({ _id: bankId })
       .select(selectedFeilds)

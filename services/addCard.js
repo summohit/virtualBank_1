@@ -50,6 +50,51 @@ module.exports.getAddedCardList = async (tokenData, jwtToken) => {
       {
         $match: { userId: objectIdInstance },
       },
+      {
+        $lookup: {
+          from: "banks",
+          let: { bank: "$bank" },
+          pipeline: [
+            {
+              $match: { $expr: { $eq: ["$bankId", "$$bank"] } },
+            },
+            {
+              $lookup: {
+                from: "staticbanks",
+                let: { bankId: "$bankId" },
+                pipeline: [
+                  {
+                    $match: { $expr: { $eq: ["$_id", "$$bankId"] } },
+                  },
+                ],
+                as: "staticBankDetails",
+              },
+            },
+            {
+              $unwind: {
+                path: "$staticBankDetails",
+                preserveNullAndEmptyArrays: true,
+              },
+            },
+          ],
+          as: "bankDetails",
+        },
+      },
+      {
+        $unwind: {
+          path: "$bankDetails",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+        $addFields: {
+          bankImg: "$bankDetails.staticBankDetails.img",
+          balance: "$bankDetails.balance",
+        },
+      },
+      {
+        $unset: ["bankDetails"],
+      },
     ];
     const bankData = await addCardDao.getAll(query);
     let result = createResponseObj(null, 200, bankData);

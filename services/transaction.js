@@ -10,28 +10,30 @@ const { createResponseObj } = require("../utils/common");
 
 module.exports.createTransaction = async (payload, tokenData, jwtToken) => {
   try {
-    console.log("Service: inside addCard");
-    if (payload.recieverAccountNumber === payload.senderAccountNumber) {
+    console.log("Service: inside create transaction", payload);
+    let balance =parseInt(payload.balance);
+    console.log("balance to be deducted", balance);
+  //  payload["balance"] = parseInt(payload.balance);
+    let senderdBankId = payload.senderdBankId;
+    const bankDetail = await bankDao.getById(senderdBankId, {});
+    console.log("bankDetail of sender", bankDetail);
+    if (!bankDetail) {
+      let error = "Account does not exist with this sender bankId";
+      let response = createResponseObj(error, 400);
+      return response;
+    }
+    if (payload.recieverAccountNumber === bankDetail.accountNumber) {
       let error = "Sender and reciever account should not be same";
       let response = createResponseObj(error, 400);
       return response;
     }
-    if (payload.senderIfscCode === payload.recieverIfscCode) {
+    if (bankDetail.ifscCode === payload.recieverIfscCode) {
       let error = "Sender and reciever IFSC code should not be same";
       let response = createResponseObj(error, 400);
       return response;
     }
 
-    let senderBankDetails = await bankDao.getByAccountNumber(
-      payload.senderAccountNumber,
-      {}
-    );
-    if (!senderBankDetails) {
-      let error = "User does not exist with this account number";
-      let response = createResponseObj(error, 400);
-      return response;
-    }
-    if (payload.transactionAmount > senderBankDetails.balance) {
+    if (balance > bankDetail.balance) {
       let error = "You have insufficient balance";
       let response = createResponseObj(error, 400);
       return response;
@@ -40,50 +42,58 @@ module.exports.createTransaction = async (payload, tokenData, jwtToken) => {
       payload.recieverAccountNumber,
       {}
     );
-    if (!recieverBankDetails) {
-      let error = "User does not exist with this account number";
-      let response = createResponseObj(error, 400);
-      return response;
+    console.log("recieverBankDetails", recieverBankDetails);
+    // if (!recieverBankDetails) {
+    //   let error = "User does not exist with this account number";
+    //   let response = createResponseObj(error, 400);
+    //   return response;
+    // }
+    await bankDao.updateByAccountNumber(
+      bankDetail.accountNumber,
+      balance,
+      "decrement"
+    );
+    if (recieverBankDetails) {
+      await bankDao.updateByAccountNumber(
+        payload.recieverAccountNumber,
+        balance,
+        "increment"
+      );
+      await transactionHistoryDao.createCreditHistory(
+        payload.recieverAccountNumber,
+        payload.recieverAccountNumber,
+        balance,
+        recieverBankDetails.userId,
+        payload.payeeName
+      );
     }
-await bankDao.updateByAccountNumber(
-  payload.senderAccountNumber,
-  payload.senderIfscCode,
-  "decrement"
-);
-await bankDao.updateByAccountNumber(
-  payload.recieverAccountNumber,
-  payload.transactionAmount,
-  "increment"
-);
 
-await transactionHistoryDao.createCreditHistory(
-  payload.recieverAccountNumber,
-  payload.recieverAccountNumber,
-  payload.transactionAmount
-);
-await transactionHistoryDao.createDebitHistory(
-  payload.senderAccountNumber,
-  payload.recieverIfscCode,
-  payload.transactionAmount
-);
+    await transactionHistoryDao.createDebitHistory(
+      bankDetail.accountNumber,
+      bankDetail.ifscCode,
+      balance,
+      bankDetail.userId,
+      payload.payeeName
+    );
     const message = "Transaction created suceessfully";
     let result = createResponseObj(message, 200, null);
+    return result;
   } catch (error) {
     console.log("Something went wrong: Service: create transaction", error);
   }
 };
 
-module.exports.getAddedCardList = async (tokenData, jwtToken) => {
+module.exports.getTransactionHistory = async (tokenData, jwtToken) => {
   try {
-    console.log("Service: inside getAddedCardList");
-    console.log("tokenData", tokenData.userId);
+    console.log("Service: inside getTransactionHistory");
+    console.log("tokenData userId", tokenData.userId);
     const objectIdInstance = new mongoose.Types.ObjectId(tokenData.userId);
     let query = [
       {
         $match: { userId: objectIdInstance },
       },
     ];
-    const bankData = await addCardDao.getAll(query);
+    const bankData = await transactionHistoryDao.getAll(query);
     let result = createResponseObj(null, 200, bankData);
     return result;
   } catch (error) {

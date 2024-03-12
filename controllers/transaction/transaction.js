@@ -31,10 +31,10 @@ const createTransaction = async (req, res) => {
   }
 };
 
-const getAddedCardList = async (req, res) => {
+const getTransactionHistory = async (req, res) => {
   try {
-    console.log("Controller: inside getBankList");
-    let result = await addCardService.getAddedCardList(
+    console.log("Controller: inside getTransactionHistory");
+    let result = await transactionService.getTransactionHistory(
       req.user,
       req.headers["authorization"]
     );
@@ -116,7 +116,8 @@ const deleteAddedCard = async (req, res) => {
 
 module.exports = {
   createTransaction,
-  getAddedCardList,
+  getTransactionHistory,
+  // getAddedCardList,
   deleteAddedCard,
   updateAddedCardStatus,
 };

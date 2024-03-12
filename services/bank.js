@@ -8,7 +8,6 @@ const axios = require("axios");
 const env = require("../config/config");
 const { createResponseObj } = require("../utils/common");
 
-
 module.exports.createBank = async (payload, tokenData, jwtToken) => {
   try {
     console.log("Service: inside createBank");
@@ -20,10 +19,10 @@ module.exports.createBank = async (payload, tokenData, jwtToken) => {
       let updateDatedPayload = { isDefaultBank: false };
       await bankDao.updateById(defaultBankData._id, updateDatedPayload);
     }
-      const staticBankData = await StaticBankDao.getById(payload.bankId,{});
+    const staticBankData = await StaticBankDao.getById(payload.bankId, {});
     payload["userId"] = tokenData.userId;
-     payload["bankName"] = staticBankData.bankName;
-  
+    payload["bankName"] = staticBankData.bankName;
+
     const bankData = await bankDao.insert(payload);
     let responseMsg = "Bank created successfully";
     let response = createResponseObj(responseMsg, 201, null);
@@ -44,7 +43,7 @@ module.exports.getBankList = async (tokenData, jwtToken) => {
   try {
     console.log("Service: inside getBankList");
     console.log("tokenData", tokenData);
-      const objectIdInstance = new mongoose.Types.ObjectId(tokenData.userId);
+    const objectIdInstance = new mongoose.Types.ObjectId(tokenData.userId);
     let query = [
       {
         $match: {
@@ -52,9 +51,41 @@ module.exports.getBankList = async (tokenData, jwtToken) => {
         },
       },
       {
+        $lookup: {
+          from: "staticbanks",
+          let: { bankId: "$bankId" },
+          pipeline: [
+            {
+              $match: { $expr: { $eq: ["$_id", "$$bankId"] } },
+            },
+            {
+              $project: {
+                img: 1,
+                _id: 0,
+              },
+            },
+          ],
+          as: "bankDetails",
+        },
+      },
+      {
+        $unwind: {
+          path: "$bankDetails",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+        $addFields: {
+          bankImg: "$bankDetails.img",
+        },
+      },
+      {
         $sort: {
           isDefaultBank: -1, // 1 for ascending order, -1 for descending order
         },
+      },
+      {
+        $unset: ["bankDetails"],
       },
     ];
     const bankData = await bankDao.getAll(query);

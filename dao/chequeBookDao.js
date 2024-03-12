@@ -76,6 +76,10 @@ const deleteAllCheque = async (bankId) => {
     console.log(error.stack);
   }
 };
+
+const generateChequeNumber = async(value)=>{
+return value+10^17
+}
 module.exports = {
   insert,
   getAll,
@@ -85,4 +89,5 @@ module.exports = {
   getByCardNumber,
   getByEmail,
   deleteAllCheque,
+  generateChequeNumber,
 };

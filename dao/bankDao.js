@@ -45,6 +45,18 @@ const getById = async (bankId, selectedFeilds) => {
   }
 };
 
+const getByAccountNumber = async (accountNumber, selectedFeilds) => {
+  try {
+    let result = await bankModel
+      .findOne({ accountNumber: accountNumber })
+      .select(selectedFeilds)
+      .lean();
+    return result;
+  } catch (error) {
+    console.log(error.stack);
+  }
+};
+
 const getByMobileNumber = async (mobileNumber) => {
   try {
     let result = await userModel.findOne({ mobileNumber: mobileNumber });
@@ -83,6 +95,32 @@ const updateById = async (bankId, payload) => {
   }
 };
 
+const updateByAccountNumber = async (
+  accountNumber,
+  balanceToBeUpdated,
+  status
+) => {
+  try {
+    let result;
+    if (status === "increment") {
+      console.log("Amount is incremented");
+      result = await bankModel.updateOne(
+        { accountNumber: accountNumber },
+        { $inc: { balance: balanceToBeUpdated } }
+      );
+    } else if (status === "decrement") {
+      console.log("Amount is decremented");
+      result = await bankModel.updateOne(
+        { accountNumber: accountNumber },
+        { $inc: { balance: -balanceToBeUpdated } }
+      );
+    }
+    return result;
+  } catch (error) {
+    console.log(error.stack);
+  }
+};
+
 const deleteById = async (bankId) => {
   try {
     let result = await bankModel.deleteOne({ _id: bankId });
@@ -106,8 +144,10 @@ module.exports = {
   getById,
   updateById,
   deleteById,
+  getByAccountNumber,
   getByMobileNumber,
   deleteByMobileNumber,
   getByUserIdAndBankId,
   getBankByUserIdAndStatus,
+  updateByAccountNumber,
 };

@@ -7,6 +7,7 @@ const chequeBook = require("./chequeBook/chequeBook");
 const cheque = require("./cheque/cheque");
 const qrcode = require("./qrcode/qrcode");
 const addCard = require("./addCard/addCard");
+const transaction = require("./transaction/transaction");
 
 Router.use("/user", user);
 
@@ -23,5 +24,7 @@ Router.use("/bank", bank);
 Router.use("/qrcode", qrcode);
 
 Router.use("/card", addCard);
+
+Router.use("/transaction", transaction);
 
 module.exports = Router;

@@ -43,6 +43,11 @@ const bankSchema = new mongoose.Schema(
       type: String,
       trim: true,
     },
+    balance: {
+      type: Number,
+      default:20000
+
+    },
   },
   { timestamps: true }
 );

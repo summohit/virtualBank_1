@@ -79,6 +79,34 @@ const getUserData = async (req, res) => {
   }
 };
 
+const getUserQrCode = async (req, res) => {
+  try {
+    console.log("Controller: inside getUserData");
+    let result = await user.getUserQrCode(
+      req.user,
+      req.headers["authorization"]
+    );
+
+    if (result.statusCode == 200 || result.statusCode == 201) {
+      return res
+        .status(result.statusCode)
+        .send(
+          apiResponse.successResponse(
+            result.data,
+            constants.defaultResponseMessage.CREATED,
+            result.statusCode
+          )
+        );
+    } else {
+      return res
+        .status(result.statusCode)
+        .send(apiResponse.errorResponse(result.message, result.statusCode));
+    }
+  } catch (error) {
+    console.log(error.stack);
+  }
+};
+
 const loginUser = async (req, res) => {
   try {
     console.log("Controller: inside LoginUser");
@@ -132,6 +160,36 @@ const updateProfile = async (req, res) => {
     console.log(error.stack);
   }
 };
+
+const updateServiceStatus = async (req, res) => {
+  try {
+    console.log("Controller: inside updateProfile");
+    let result = await user.updateServiceStatus(
+      req.body,
+      req.user,
+      req.headers["authorization"]
+    );
+    console.log("result", result);
+    if (result.statusCode == 200 || result.statusCode == 201) {
+      return res
+        .status(result.statusCode)
+        .send(
+          apiResponse.successResponse(
+            result.data,
+            constants.defaultResponseMessage.UPDATED,
+            result.statusCode
+          )
+        );
+    } else {
+      return res
+        .status(result.statusCode)
+        .send(apiResponse.errorResponse(result.message, result.statusCode));
+    }
+  } catch (error) {
+    console.log(error.stack);
+  }
+};
+
 
 const uploadProfileImage = async (req, res) => {
   try {
@@ -193,4 +251,6 @@ module.exports = {
   deleteUserData,
   uploadProfileImage,
   getCardDetails,
+  updateServiceStatus,
+  getUserQrCode,
 };

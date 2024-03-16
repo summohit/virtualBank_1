@@ -42,7 +42,7 @@ const userSchema = new mongoose.Schema(
       deviceOS: String,
       deviceOSVersion: String,
     },
-    profileImage:{
+    profileImage: {
       type: String,
       trim: true,
     },
@@ -52,6 +52,14 @@ const userSchema = new mongoose.Schema(
       trim: true,
     },
     token: String,
+    isAllServiceActive: {
+      type: Boolean,
+      default: false,
+    },
+    userDetailQrCode:{
+      type: String,
+      trim: true,
+    },
   },
   { timestamps: true }
 );

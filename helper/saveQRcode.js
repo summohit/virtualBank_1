@@ -4,6 +4,7 @@ const axios = require("axios");
 const env = require("../config/config");
 const chequeBookDao = require("../dao/chequeBookDao");
 const chequeDao = require("../dao/chequeDao");
+const userDao = require("../dao/userDao");
 
 const generateAndSaveQrCode = async (jsonPayload, jwtToken) => {
   try {
@@ -74,9 +75,27 @@ async function generateQRCode(data) {
   }
 }
 
+
+const generateAndSaveUserQrCode= async (jsonPayload) => {
+  try {
+    const jsonString = JSON.stringify(jsonPayload);
+    var base64ImageUrl;
+    QRCode.toDataURL(jsonString, async (err, url) => {
+      base64ImageUrl = url.split(",")[1];
+      let payload = {
+        userDetailQrCode: base64ImageUrl,
+      };
+      await userDao.updateById(jsonPayload._id, payload);
+    });
+  } catch (error) {
+    console.error("Error generating QR code:", error);
+  }
+};
+
 module.exports = {
   generateAndSaveQrCode,
   generateAndSaveChequeBookQrCode,
   generateAndSaveChequeQrCode,
   generateQRCode,
+  generateAndSaveUserQrCode,
 };

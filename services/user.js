@@ -8,6 +8,7 @@ const env = require("../config/config");
 const { createResponseObj } = require("../utils/common");
 const { generateAuthKey } = require("../helper/auth/jwt");
 const { uploadProfileImage } = require("../helper/saveQRcode");
+const { generateAndSaveUserQrCode } = require("../helper/saveQRcode");
 
 module.exports.createUser = async (data, adminId) => {
   try {
@@ -33,6 +34,7 @@ module.exports.createUser = async (data, adminId) => {
       return response;
     }
     let createdUserData = await userDao.insert(userData);
+    await generateAndSaveUserQrCode(createdUserData);
     const apiUrl = `${env.baseUrl}/api/user/createAccount`;
     const hP = await hash(data.password, 10);
     const payload = {
@@ -54,6 +56,30 @@ module.exports.createUser = async (data, adminId) => {
 };
 
 //updateUserProfile
+//updateServiceStatus
+module.exports.updateServiceStatus = async (data, tokenData, jwtToken) => {
+  try {
+    console.log("Service: inside createUser");
+    const isUserExist = await userDao.getById(tokenData.userId, {});
+    if (!isUserExist) {
+      let error = "User does not exist";
+      let response = createResponseObj(error, 400);
+      return response;
+    }
+    let userServiceData = isUserExist?.isAllServiceActive ? false : true;
+    let updateData = {
+      isAllServiceActive:userServiceData,
+    };
+    await userDao.updateById(tokenData.userId, updateData);
+
+    const message = "Status updated suceessfully";
+    let result = createResponseObj(message, 200, null);
+    return result;
+  } catch (error) {
+    console.log("Something went wrong: Service: blog", error);
+    throw new customError(error, error.statusCode);
+  }
+};
 
 module.exports.updateUserProfile = async (data, tokenData, jwtToken) => {
   try {
@@ -83,7 +109,7 @@ module.exports.updateUserProfile = async (data, tokenData, jwtToken) => {
         Authorization: jwtToken,
       },
     });
-    
+
     let response = createResponseObj(null, 200, null);
     return response;
   } catch (error) {
@@ -102,7 +128,7 @@ module.exports.getCardDetails = async (tokenData, jwtToken) => {
       lastName: 1,
       mobileNumber: 1,
       email: 1,
-      profileImage:1,
+      profileImage: 1,
     });
     if (!isUserExist) {
       let error = "User does not exist";
@@ -118,7 +144,7 @@ module.exports.getCardDetails = async (tokenData, jwtToken) => {
         Authorization: jwtToken,
       },
     });
-    const { _id,userId, ...accountRelatedData } = res.data.body;
+    const { _id, userId, ...accountRelatedData } = res.data.body;
     userData = { ...userData, ...accountRelatedData };
     let result = createResponseObj(null, 201, userData);
     return result;
@@ -159,6 +185,29 @@ module.exports.getUserData = async (tokenData, jwtToken) => {
     userData["isProfiledCompleted"] =
       res.data.body.transactionPassword.length !== 0 ? true : false;
     let result = createResponseObj(null, 201, userData);
+    return result;
+  } catch (error) {
+    console.log("Something went wrong: Service: blog", error);
+    throw new customError(error, error.statusCode);
+  }
+};
+
+//getUserQrCode
+module.exports.getUserQrCode = async (tokenData, jwtToken) => {
+  try {
+    console.log("Service: inside getUserData");
+    console.log("tokenData", tokenData);
+    const isUserExist = await userDao.getById(tokenData.userId, {
+      userDetailQrCode: 1,
+    });
+    if (!isUserExist) {
+      let error = "User does not exist";
+      let response = createResponseObj(error, 400);
+      return response;
+    }
+
+    let userData = isUserExist;
+    let result = createResponseObj(null, 200, userData);
     return result;
   } catch (error) {
     console.log("Something went wrong: Service: blog", error);

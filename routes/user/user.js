@@ -6,8 +6,9 @@ const {
   updateProfile,
   getUserData,
   deleteUserData,
-  uploadProfileImage,
   getCardDetails,
+  updateServiceStatus,
+  getUserQrCode,
 } = require("../../controllers/user/user");
 const { verifyKey } = require("../../helper/auth/auth");
 const { registrationValidation } = require("../../middlewares/userValidation");
@@ -16,11 +17,16 @@ Router.post("/createUser",registrationValidation, createUser);
 
 Router.put("/updateProfile",verifyKey, updateProfile);
 
+Router.put("/updateServiceStatus", verifyKey, updateServiceStatus);
+
 // Router.post("/uploadProfileImage", verifyKey,upload.single("profileImage"), uploadProfileImage);
 
 Router.get("/getUserData", verifyKey, getUserData);
 
 Router.get("/getCardDetails", verifyKey, getCardDetails);
+
+//getUserQrCode
+Router.get("/getUserQrCode", verifyKey, getUserQrCode);
 
 Router.delete("/deleteUser/:mobileNumber", deleteUserData);
 

@@ -17,7 +17,11 @@ const uploadQRSchema = new mongoose.Schema(
     cardType: {
       type: String,
     },
-    bankId: {
+    staticBankId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "staticBank",
+    },
+    dynamicBankId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "bank",
     },

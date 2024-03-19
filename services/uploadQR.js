@@ -16,9 +16,10 @@ module.exports.addQRCode = async (payload, tokenData, jwtToken) => {
     let data = {
       userId: tokenData.userId,
       type: payload.type,
-      bankId: payload.bankId,
       cardType: payload.cardType,
     };
+    if(type=== "bank")data["staticBankId"] = payload.bankId;
+    else data["dynamicBankId"] = payload.bankId;
     const createdData = await uploadQRDao.insert(data);
     payload["_id"] = createdData._id;
     await generateAndSaveBankDetailQR(payload);
@@ -56,7 +57,7 @@ module.exports.getQrCodeList = async (qrType, tokenData, jwtToken) => {
       {
         $lookup: {
           from: "staticbanks",
-          let: { bankId: "$bankId" },
+          let: { bankId: "$staticBankId" },
           pipeline: [
             {
               $match: { $expr: { $eq: ["$_id", "$$bankId"] } },
@@ -69,24 +70,48 @@ module.exports.getQrCodeList = async (qrType, tokenData, jwtToken) => {
               },
             },
           ],
-          as: "bankDetails",
+          as: "staticBankDetails",
         },
       },
       {
         $unwind: {
-          path: "$bankDetails",
+          path: "$staticBankDetails",
           preserveNullAndEmptyArrays: true,
         },
       },
       {
-        $addFields: {
-          bankName: "$bankDetails.bankName",
-          bankImg: "$bankDetails.img",
+        $lookup: {
+          from: "banks",
+          let: { bankId: "$dynamicBankId" },
+          pipeline: [
+            {
+              $match: { $expr: { $eq: ["$_id", "$$bankId"] } },
+            },
+            {
+              $project: {
+                bankName: 1,
+                _id: 0,
+              },
+            },
+          ],
+          as: "dynamicBankDetails",
         },
       },
       {
-        $unset: ["bankDetails"],
+        $unwind: {
+          path: "$dynamicBankDetails",
+          preserveNullAndEmptyArrays: true,
+        },
       },
+      // {
+      //   $addFields: {
+      //     bankName: "$bankDetails.bankName",
+      //     bankImg: "$bankDetails.img",
+      //   },
+      // },
+      // {
+      //   $unset: ["bankDetails"],
+      // },
     ];
     const bankData = await uploadQRDao.getAll(query);
     let result = createResponseObj(null, 200, bankData);

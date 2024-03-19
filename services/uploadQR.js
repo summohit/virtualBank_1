@@ -16,6 +16,7 @@ module.exports.addQRCode = async (payload, tokenData, jwtToken) => {
     let data = {
       userId: tokenData.userId,
       type: payload.type,
+      bankId: payload.bankId,
     };
     const createdData = await uploadQRDao.insert(data);
     payload["_id"] = createdData._id;
@@ -35,8 +36,7 @@ module.exports.addQRCode = async (payload, tokenData, jwtToken) => {
   }
 };
 
-
-module.exports.getQrCodeList = async (qrType,tokenData, jwtToken) => {
+module.exports.getQrCodeList = async (qrType, tokenData, jwtToken) => {
   try {
     console.log("Service: inside getBankList");
     console.log("tokenData", tokenData);
@@ -51,6 +51,38 @@ module.exports.getQrCodeList = async (qrType,tokenData, jwtToken) => {
         $match: {
           type: qrType,
         },
+      },
+      {
+        $lookup: {
+          from: "banks",
+          let: { bankId: "$bankId" },
+          pipeline: [
+            {
+              $match: { $expr: { $eq: ["$_id", "$$bankId"] } },
+            },
+            {
+              $project: {
+                bankName: 1,
+                _id: 0,
+              },
+            },
+          ],
+          as: "bankDetails",
+        },
+      },
+      {
+        $unwind: {
+          path: "$bankDetails",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+        $addFields: {
+          bankName: "$bankDetails.bankName",
+        },
+      },
+      {
+        $unset: ["bankDetails"],
       },
     ];
     const bankData = await uploadQRDao.getAll(query);
@@ -71,9 +103,9 @@ module.exports.updateQrCodeStatus = async (qrCodeId, tokenData, jwtToken) => {
       let response = createResponseObj(error, 400);
       return response;
     }
-   let dataToBeUpdated = {
-     status:1,
-   };
+    let dataToBeUpdated = {
+      status: 1,
+    };
     await uploadQRDao.updateById(qrCodeId, dataToBeUpdated);
     let response = createResponseObj(null, 200, null);
     return response;

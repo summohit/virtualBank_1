@@ -14,9 +14,13 @@ const uploadQRSchema = new mongoose.Schema(
     type: {
       type: String,
     },
+    bankId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "bank",
+    },
     status: {
       type: Number,
-      default:0
+      default: 0,
     },
   },
   { timestamps: true }

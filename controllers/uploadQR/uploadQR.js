@@ -1,11 +1,11 @@
 const constants = require("../../constant/index");
-const bankService = require("../../services/bank");
+const uploadQRService = require("../../services/uploadQR");
 const apiResponse = require("../../helper/apiResponser");
 
-const createBank = async (req, res) => {
+const addQRCode = async (req, res) => {
   try {
-    console.log("Controller: inside createBeneficiary");
-    let result = await bankService.createBank(
+    console.log("Controller: inside addQRCode");
+    let result = await uploadQRService.addQRCode(
       req.body,
       req.user,
       req.headers["authorization"]
@@ -31,10 +31,11 @@ const createBank = async (req, res) => {
   }
 };
 
-const getBankList = async (req, res) => {
+const getQrCodeList = async (req, res) => {
   try {
-    console.log("Controller: inside getBankList");
-    let result = await bankService.getBankList(
+    console.log("Controller: inside getQrCodeList");
+    let result = await uploadQRService.getQrCodeList(
+      req.query.type,
       req.user,
       req.headers["authorization"]
     );
@@ -87,7 +88,7 @@ const getUserData = async (req, res) => {
 const setDefaultBank = async (req, res) => {
   try {
     console.log("Controller: inside setDefaultBank");
-    const bankId = req.params.bankId
+    const bankId = req.params.bankId;
     let result = await bankService.setDefaultBank(
       bankId,
       req.user,
@@ -114,7 +115,34 @@ const setDefaultBank = async (req, res) => {
   }
 };
 
-
+const updateQrCodeStatus = async (req, res) => {
+  try {
+    console.log("Controller: inside updateQrCodeStatus");
+    let result = await uploadQRService.updateQrCodeStatus(
+      req.params.id,
+      req.user,
+      req.headers["authorization"]
+    );
+    console.log("result", result);
+    if (result.statusCode == 200 || result.statusCode == 201) {
+      return res
+        .status(result.statusCode)
+        .send(
+          apiResponse.successResponse(
+            result.data,
+            constants.defaultResponseMessage.UPDATED,
+            result.statusCode
+          )
+        );
+    } else {
+      return res
+        .status(result.statusCode)
+        .send(apiResponse.errorResponse(result.message, result.statusCode));
+    }
+  } catch (error) {
+    console.log(error.stack);
+  }
+};
 const deleteBank = async (req, res) => {
   try {
     console.log("Controller: inside deleteUserData");
@@ -140,14 +168,9 @@ const deleteBank = async (req, res) => {
 };
 
 module.exports = {
-  createBank,
-  getBankList,
+  addQRCode,
+  getQrCodeList,
+  updateQrCodeStatus,
   setDefaultBank,
   deleteBank,
-  //   loginUser,
-  //   updateProfile,
-  //   getUserData,
-  //   deleteUserData,
-  //   uploadProfileImage,
-  //   getCardDetails,
 };

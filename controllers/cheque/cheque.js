@@ -62,30 +62,7 @@ const getChequeList = async (req, res) => {
   }
 };
 
-const getUserData = async (req, res) => {
-  try {
-    console.log("Controller: inside getUserData");
-    let result = await user.getUserData(req.user, req.headers["authorization"]);
 
-    if (result.statusCode == 200 || result.statusCode == 201) {
-      return res
-        .status(result.statusCode)
-        .send(
-          apiResponse.successResponse(
-            result.data,
-            constants.defaultResponseMessage.CREATED,
-            result.statusCode
-          )
-        );
-    } else {
-      return res
-        .status(result.statusCode)
-        .send(apiResponse.errorResponse(result.message, result.statusCode));
-    }
-  } catch (error) {
-    console.log(error.stack);
-  }
-};
 
 
 const fillCheque = async (req, res) => {
@@ -145,29 +122,7 @@ const updateChequeStatus = async (req, res) => {
     console.log(error.stack);
   }
 };
-const deleteUserData = async (req, res) => {
-  try {
-    console.log("Controller: inside deleteUserData");
-    let result = await user.deleteUserData(req.params.mobileNumber);
-    if (result.statusCode == 200 || result.statusCode == 201) {
-      return res
-        .status(result.statusCode)
-        .send(
-          apiResponse.successResponse(
-            result.data,
-            constants.defaultResponseMessage.DELETED,
-            result.statusCode
-          )
-        );
-    } else {
-      return res
-        .status(result.statusCode)
-        .send(apiResponse.errorResponse(result.message, result.statusCode));
-    }
-  } catch (error) {
-    console.log(error.stack);
-  }
-};
+
 
 module.exports = {
   createCheque,

@@ -14,6 +14,9 @@ const uploadQRSchema = new mongoose.Schema(
     type: {
       type: String,
     },
+    cardType: {
+      type: String,
+    },
     bankId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "bank",

@@ -54,7 +54,7 @@ module.exports.getQrCodeList = async (qrType, tokenData, jwtToken) => {
       },
       {
         $lookup: {
-          from: "banks",
+          from: "staticbanks",
           let: { bankId: "$bankId" },
           pipeline: [
             {
@@ -63,6 +63,7 @@ module.exports.getQrCodeList = async (qrType, tokenData, jwtToken) => {
             {
               $project: {
                 bankName: 1,
+                img: 1,
                 _id: 0,
               },
             },
@@ -79,6 +80,7 @@ module.exports.getQrCodeList = async (qrType, tokenData, jwtToken) => {
       {
         $addFields: {
           bankName: "$bankDetails.bankName",
+          bankImg: "$bankDetails.img",
         },
       },
       {

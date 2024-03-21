@@ -18,7 +18,7 @@ module.exports.addQRCode = async (payload, tokenData, jwtToken) => {
       type: payload.type,
       cardType: payload.cardType,
     };
-    if(type=== "bank")data["staticBankId"] = payload.bankId;
+    if (payload.type === "bank") data["staticBankId"] = payload.bankId;
     else data["dynamicBankId"] = payload.bankId;
     const createdData = await uploadQRDao.insert(data);
     payload["_id"] = createdData._id;

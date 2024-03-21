@@ -9,6 +9,8 @@ const {
 
 Router.post("/create", verifyKey, addQRCode);
 
+// Router.post("/createChequeQr", verifyKey, createChequeQr);
+
 Router.get("/getQr", verifyKey, getQrCodeList);
 
 // Router.delete("/delete/:addedCardId", verifyKey, deleteAddedCard);

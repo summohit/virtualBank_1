@@ -56,7 +56,7 @@ module.exports.getAddedCardList = async (tokenData, jwtToken) => {
           let: { bank: "$bank" },
           pipeline: [
             {
-              $match: { $expr: { $eq: ["$bankId", "$$bank"] } },
+              $match: { $expr: { $eq: ["$_id", "$$bank"] } },
             },
             {
               $lookup: {

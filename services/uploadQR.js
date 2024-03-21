@@ -65,7 +65,7 @@ module.exports.getQrCodeList = async (qrType, tokenData, jwtToken) => {
             {
               $project: {
                 bankName: 1,
-                img: 1,
+                // img: 1,
                 _id: 0,
               },
             },
@@ -103,15 +103,25 @@ module.exports.getQrCodeList = async (qrType, tokenData, jwtToken) => {
           preserveNullAndEmptyArrays: true,
         },
       },
+      {
+        $addFields: {
+          bankName: {
+            $ifNull: [
+              "$staticBankDetails.bankName",
+              "$dynamicBankDetails.bankName",
+            ],
+          },
+        },
+      },
       // {
       //   $addFields: {
       //     bankName: "$bankDetails.bankName",
       //     bankImg: "$bankDetails.img",
       //   },
       // },
-      // {
-      //   $unset: ["bankDetails"],
-      // },
+      {
+        $unset: ["dynamicBankDetails","staticBankDetails"],
+      },
     ];
     const bankData = await uploadQRDao.getAll(query);
     let result = createResponseObj(null, 200, bankData);

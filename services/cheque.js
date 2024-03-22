@@ -13,15 +13,15 @@ const {
   generateAndSaveChequeBookQrCode,
 } = require("../helper/saveQRcode");
 
-module.exports.createCheque = async (bankNumber, tokenData, jwtToken) => {
+module.exports.createCheque = async (
+  numberOfCheque,
+  bankId,
+  tokenData,
+  jwtToken
+) => {
   try {
     console.log("Service: inside createCheque");
-    const bankData = await staticBankDao.getByBankId(bankNumber, {});
-    console.log("bankData", bankData);
-    const userDataExist = await bankDao.getByUserIdAndBankId(
-      tokenData.userId,
-      bankData._id
-    );
+    const userDataExist = await bankDao.getById( bankId,{});
 
     if (!userDataExist) {
       let error = "User does not registered with this bank";
@@ -42,8 +42,8 @@ module.exports.createCheque = async (bankNumber, tokenData, jwtToken) => {
       bankId: bankRegisteredWithUser._id,
       // chequeNumber:
     };
-    for (let i = 0; i < 10; i++) {
-      payload["chequeNumber"] = `"18025`+(i+1)+`"  110259008 : 066000"`;
+    for (let i = 0; i < numberOfCheque; i++) {
+      payload["chequeNumber"] = `"18025` + (i + 1) + `"  110259008 : 066000"`;
       console.log("payload", payload);
       let chequeData = await chequeDao.insert(payload);
       let qrCodePayload = {

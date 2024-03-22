@@ -3,6 +3,7 @@ const fs = require("fs");
 const axios = require("axios");
 const env = require("../config/config");
 const chequeBookDao = require("../dao/chequeBookDao");
+const uploadCheckQRDao = require("../dao/chequeQrDao");
 const chequeDao = require("../dao/chequeDao");
 const userDao = require("../dao/userDao");
 const uploadQRDao = require("../dao/uploadQR");
@@ -109,10 +110,28 @@ const generateAndSaveBankDetailQR = async (jsonPayload) => {
   }
 };
 
+
+const generateAndSaveChequeQR = async (jsonPayload) => {
+  try {
+    const jsonString = JSON.stringify(jsonPayload);
+    var base64ImageUrl;
+    QRCode.toDataURL(jsonString, async (err, url) => {
+      base64ImageUrl = url.split(",")[1];
+      let payload = {
+        qrCode: base64ImageUrl,
+      };
+      await uploadCheckQRDao.updateById(jsonPayload._id, payload);
+    });
+  } catch (error) {
+    console.error("Error generating QR code:", error);
+  }
+};
+
 module.exports = {
   generateAndSaveQrCode,
   generateAndSaveChequeBookQrCode,
   generateAndSaveChequeQrCode,
+  generateAndSaveChequeQR,
   generateQRCode,
   generateAndSaveUserQrCode,
   generateAndSaveBankDetailQR,

@@ -90,6 +90,33 @@ const createChequeQr = async (req, res) => {
   }
 };
 
+const getChequeQrCodeList = async (req, res) => {
+  try {
+    console.log("Controller: inside getChequeQrCodeList");
+    let result = await uploadQRService.getChequeQrCodeList(
+      req.user,
+      req.headers["authorization"]
+    );
+
+    if (result.statusCode == 200 || result.statusCode == 201) {
+      return res
+        .status(result.statusCode)
+        .send(
+          apiResponse.successResponse(
+            result.data,
+            constants.defaultResponseMessage.FETCHED,
+            result.statusCode
+          )
+        );
+    } else {
+      return res
+        .status(result.statusCode)
+        .send(apiResponse.errorResponse(result.message, result.statusCode));
+    }
+  } catch (error) {
+    console.log(error.stack);
+  }
+};
 const getUserData = async (req, res) => {
   try {
     console.log("Controller: inside getUserData");
@@ -204,4 +231,5 @@ module.exports = {
   setDefaultBank,
   deleteBank,
   createChequeQr,
+  getChequeQrCodeList,
 };

@@ -37,7 +37,7 @@ const getById = async (bankId, selectedFeilds) => {
 const getByBankId = async (bankId, selectedFeilds) => {
   try {
     let result = await staticBankModel
-      .findOne({ bankId: bankId })
+      .findOne({ _id: bankId })
       .select(selectedFeilds)
       .lean();
     return result;

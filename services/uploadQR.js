@@ -3,12 +3,15 @@ const mongoose = require("mongoose");
 const bankDao = require("../dao/bankDao");
 const StaticBankDao = require("../dao/staticBankDao");
 const uploadQRDao = require("../dao/uploadQR");
-const uploadCheckQRDao = require("../dao/uploadQR");
+const uploadCheckQRDao = require("../dao/chequeQrDao");
 const chequeBookDao = require("../dao/chequeBookDao");
 const userDao = require("../dao/userDao");
 const axios = require("axios");
 const env = require("../config/config");
-const { generateAndSaveBankDetailQR } = require("../helper/saveQRcode");
+const {
+  generateAndSaveBankDetailQR,
+  generateAndSaveChequeQR,
+} = require("../helper/saveQRcode");
 const { createResponseObj } = require("../utils/common");
 
 module.exports.addQRCode = async (payload, tokenData, jwtToken) => {
@@ -17,6 +20,7 @@ module.exports.addQRCode = async (payload, tokenData, jwtToken) => {
     let data = {
       userId: tokenData.userId,
       type: payload.type,
+      status: payload.status,
       cardType: payload.cardType,
     };
     if (payload.type === "bank") data["staticBankId"] = payload.bankId;
@@ -44,14 +48,13 @@ module.exports.createChequeQr = async (payload, tokenData, jwtToken) => {
     console.log("Service: inside createChequeQr");
     let data = {
       userId: tokenData.userId,
-      type: payload.type,
-      cardType: payload.cardType,
+      bank: payload.bank,
+      leaf: payload.leaf,
+      alias: payload.alias,
     };
-    if (payload.type === "bank") data["staticBankId"] = payload.bankId;
-    else data["dynamicBankId"] = payload.bankId;
     const createdData = await uploadCheckQRDao.insert(data);
     payload["_id"] = createdData._id;
-    await generateAndSaveBankDetailQR(payload);
+    await generateAndSaveChequeQR(payload);
     let responseMsg = "QR Code created successfully";
     let response = createResponseObj(responseMsg, 201, null);
     return response;
@@ -149,10 +152,63 @@ module.exports.getQrCodeList = async (qrType, tokenData, jwtToken) => {
       //   },
       // },
       {
-        $unset: ["dynamicBankDetails","staticBankDetails"],
+        $unset: ["dynamicBankDetails", "staticBankDetails"],
       },
     ];
     const bankData = await uploadQRDao.getAll(query);
+    let result = createResponseObj(null, 200, bankData);
+    return result;
+  } catch (error) {
+    console.log("Something went wrong: Service: getBanks", error);
+    throw new customError(error, error.statusCode);
+  }
+};
+
+module.exports.getChequeQrCodeList = async (tokenData, jwtToken) => {
+  try {
+    console.log("Service: inside getChequeQrCodeList");
+    console.log("tokenData", tokenData);
+    const objectIdInstance = new mongoose.Types.ObjectId(tokenData.userId);
+    let query = [
+      {
+        $match: {
+          userId: objectIdInstance,
+        },
+      },
+      {
+        $lookup: {
+          from: "banks",
+          let: { bankId: "$bank" },
+          pipeline: [
+            {
+              $match: { $expr: { $eq: ["$_id", "$$bankId"] } },
+            },
+            {
+              $project: {
+                bankName: 1,
+                _id: 0,
+              },
+            },
+          ],
+          as: "dynamicBankDetails",
+        },
+      },
+      {
+        $unwind: {
+          path: "$dynamicBankDetails",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+        $addFields: {
+          bankName:  "$dynamicBankDetails.bankName",
+        },
+      },
+      {
+        $unset: ["dynamicBankDetails"],
+      },
+    ];
+    const bankData = await uploadCheckQRDao.getAll(query);
     let result = createResponseObj(null, 200, bankData);
     return result;
   } catch (error) {
@@ -174,6 +230,30 @@ module.exports.updateQrCodeStatus = async (qrCodeId, tokenData, jwtToken) => {
       status: 1,
     };
     await uploadQRDao.updateById(qrCodeId, dataToBeUpdated);
+    let response = createResponseObj(null, 200, null);
+    return response;
+  } catch (error) {
+    console.log("Something went wrong: Service: blog", error);
+    throw new customError(error, error.statusCode);
+  }
+};
+module.exports.updateChequeQrCodeStatus = async (
+  ChequeQrCodeId,
+  tokenData,
+  jwtToken
+) => {
+  try {
+    console.log("Service: inside updateQrCodeStatus");
+    const isCheckExist = await uploadCheckQRDao.getById(ChequeQrCodeId);
+    if (!isCheckExist) {
+      let error = "Cheque Qr data does not exist";
+      let response = createResponseObj(error, 400);
+      return response;
+    }
+    let dataToBeUpdated = {
+      status: 1,
+    };
+    await uploadCheckQRDao.updateById(qrCodeId, dataToBeUpdated);
     let response = createResponseObj(null, 200, null);
     return response;
   } catch (error) {

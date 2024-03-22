@@ -4,12 +4,13 @@ const {
   addQRCode,
   getQrCodeList,
   //   deleteAddedCard,
-     updateQrCodeStatus,
+  updateQrCodeStatus,
+  createChequeQr,
 } = require("../../controllers/uploadQR/uploadQR");
 
 Router.post("/create", verifyKey, addQRCode);
 
-// Router.post("/createChequeQr", verifyKey, createChequeQr);
+Router.post("/createChequeQr", verifyKey, createChequeQr);
 
 Router.get("/getQr", verifyKey, getQrCodeList);
 

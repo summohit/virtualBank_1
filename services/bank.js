@@ -39,6 +39,22 @@ module.exports.createBank = async (payload, tokenData, jwtToken) => {
   }
 };
 
+//getBankBalance
+module.exports.getBankBalance = async (bankId, tokenData, jwtToken) => {
+  try {
+    console.log("Service: inside getBankList");
+    console.log("tokenData", tokenData);
+    let selectedFeilds = {
+      balance: 1,
+    };
+    const bankData = await bankDao.getById(bankId, selectedFeilds);
+    let result = createResponseObj(null, 200, bankData);
+    return result;
+  } catch (error) {
+    console.log("Something went wrong: Service: getBanks", error);
+    throw new customError(error, error.statusCode);
+  }
+};
 module.exports.getBankList = async (tokenData, jwtToken) => {
   try {
     console.log("Service: inside getBankList");

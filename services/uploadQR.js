@@ -3,6 +3,7 @@ const mongoose = require("mongoose");
 const bankDao = require("../dao/bankDao");
 const StaticBankDao = require("../dao/staticBankDao");
 const uploadQRDao = require("../dao/uploadQR");
+const uploadCheckQRDao = require("../dao/uploadQR");
 const chequeBookDao = require("../dao/chequeBookDao");
 const userDao = require("../dao/userDao");
 const axios = require("axios");
@@ -21,6 +22,34 @@ module.exports.addQRCode = async (payload, tokenData, jwtToken) => {
     if (payload.type === "bank") data["staticBankId"] = payload.bankId;
     else data["dynamicBankId"] = payload.bankId;
     const createdData = await uploadQRDao.insert(data);
+    payload["_id"] = createdData._id;
+    await generateAndSaveBankDetailQR(payload);
+    let responseMsg = "QR Code created successfully";
+    let response = createResponseObj(responseMsg, 201, null);
+    return response;
+  } catch (error) {
+    if (error.response) {
+      let errorMessage = error.response.data.message;
+      let response = createResponseObj(errorMessage, 400);
+      return response;
+    } else {
+      console.log("Something went wrong: Service: blog", error);
+      throw new customError(error, error.statusCode);
+    }
+  }
+};
+
+module.exports.createChequeQr = async (payload, tokenData, jwtToken) => {
+  try {
+    console.log("Service: inside createChequeQr");
+    let data = {
+      userId: tokenData.userId,
+      type: payload.type,
+      cardType: payload.cardType,
+    };
+    if (payload.type === "bank") data["staticBankId"] = payload.bankId;
+    else data["dynamicBankId"] = payload.bankId;
+    const createdData = await uploadCheckQRDao.insert(data);
     payload["_id"] = createdData._id;
     await generateAndSaveBankDetailQR(payload);
     let responseMsg = "QR Code created successfully";

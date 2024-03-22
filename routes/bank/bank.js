@@ -5,11 +5,14 @@ const {
   getBankList,
   setDefaultBank,
   deleteBank,
+  getBankBalance,
 } = require("../../controllers/bank/bank");
 
 Router.post("/createBank", verifyKey, createBank);
 
 Router.get("/bankList", verifyKey, getBankList);
+
+Router.get("/balance/:bankId", verifyKey, getBankBalance);
 
 Router.put("/setDefaultBank/:bankId", verifyKey, setDefaultBank);
 

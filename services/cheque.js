@@ -32,6 +32,7 @@ module.exports.createCheque = async (
     let chequeBookPayload = {
       bankId: bankRegisteredWithUser._id,
       userId: tokenData.userId,
+      numberOfPages: numberOfCheque,
     };
 
     const chequeBookData = await chequeBookDao.insert(chequeBookPayload);

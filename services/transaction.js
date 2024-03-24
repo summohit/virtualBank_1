@@ -18,7 +18,15 @@ module.exports.createTransaction = async (payload, tokenData, jwtToken) => {
     let senderdBankId = payload.senderdBankId;
     const bankDetail = await bankDao.getById(senderdBankId, {});
     console.log("bankDetail of sender", bankDetail);
-    if (!bankDetail) {
+    const getSendCardDetail = await addCardDao.customQuery({"bank":payload.senderdBankId});
+    const sendCard = getSendCardDetail[0];
+    console.log("getCardById of reciver", getSendCardDetail);
+    if(sendCard.status === 0){
+      let error = "Please Activate your card and try again!!";
+      let response = createResponseObj(error, 400);
+      return response;
+    }
+     if (!bankDetail) {
       let error = "Account does not exist with this sender bankId";
       let response = createResponseObj(error, 400);
       return response;

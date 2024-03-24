@@ -60,21 +60,33 @@ module.exports.createUser = async (data, adminId) => {
 module.exports.updateServiceStatus = async (data, tokenData, jwtToken) => {
   try {
     console.log("Service: inside createUser");
-    const isUserExist = await userDao.getById(tokenData.userId, {});
-    if (!isUserExist) {
+    const getUserByToken = await userDao.getById(tokenData.userId, {});
+    const getUserByMobileNo = await userDao.getByMobileNumber(data.mobileNumber);
+    let result;
+    console.log("getUserByToken", getUserByToken.mobileNumber);
+    console.log("getUserByMobileNo", getUserByMobileNo.mobileNumber);
+    if(getUserByToken && getUserByMobileNo){
+      if(getUserByMobileNo.mobileNumber === getUserByToken.mobileNumber){
+        let userServiceData = getUserByMobileNo?.isAllServiceActive ? false : true;
+        let updateData = {
+          isAllServiceActive:userServiceData,
+        };
+        await userDao.updateById(tokenData.userId, updateData);
+        const message = "Status updated suceessfully";
+        result = createResponseObj(message, 200, null);
+        return result;
+      }else{
+        let error = "access Deny to unauthorized user.";
+        let response = createResponseObj(error, 400);
+        return response; 
+      }
+    }else{
       let error = "User does not exist";
       let response = createResponseObj(error, 400);
       return response;
     }
-    let userServiceData = isUserExist?.isAllServiceActive ? false : true;
-    let updateData = {
-      isAllServiceActive:userServiceData,
-    };
-    await userDao.updateById(tokenData.userId, updateData);
-
-    const message = "Status updated suceessfully";
-    let result = createResponseObj(message, 200, null);
-    return result;
+    
+   
   } catch (error) {
     console.log("Something went wrong: Service: blog", error);
     throw new customError(error, error.statusCode);

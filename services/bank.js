@@ -12,7 +12,7 @@ module.exports.createBank = async (payload, tokenData, jwtToken) => {
   try {
     console.log("Service: inside createBank");
     let result;
-    if(tokenData.userId === payload.userId){
+    if(tokenData.userId === payload.genratedPersonId){
       const defaultBankData = await bankDao.getBankByUserIdAndStatus(
         tokenData.userId,
         {}
@@ -24,7 +24,6 @@ module.exports.createBank = async (payload, tokenData, jwtToken) => {
       const staticBankData = await StaticBankDao.getById(payload.bankId, {});
       payload["userId"] = tokenData.userId;
       payload["bankName"] = staticBankData.bankName;
-  
       const bankData = await bankDao.insert(payload);
       let responseMsg = "Bank created successfully";
       result = createResponseObj(responseMsg, 201, null);

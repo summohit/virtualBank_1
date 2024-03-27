@@ -18,7 +18,7 @@ module.exports.createTransaction = async (payload, tokenData, jwtToken) => {
     let senderdBankId = payload.senderdBankId;
     const bankDetail = await bankDao.getById(senderdBankId, {});
     console.log("bankDetail of sender", bankDetail);
-    const getSendCardDetail = await addCardDao.customQuery({"bank":bankDetail.bankId});
+    const getSendCardDetail = await addCardDao.customQuery({"bank":payload.senderdBankId});
     const sendCard = getSendCardDetail[0];
     console.log("getCardById of reciver", getSendCardDetail);
     if(sendCard.status === 0){

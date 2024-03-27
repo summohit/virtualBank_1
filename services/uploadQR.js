@@ -53,6 +53,7 @@ module.exports.createChequeQr = async (payload, tokenData, jwtToken) => {
       bank: payload.bank,
       leaf: payload.leaf,
       alias: payload.alias,
+      genratedPersonId : tokenData.userId
     };
     const createdData = await uploadCheckQRDao.insert(data);
     payload["_id"] = createdData._id;

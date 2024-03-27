@@ -21,7 +21,8 @@ module.exports.createCheque = async (
   jwtToken
 ) => {
   try {
-    console.log("Service: inside createCheque");
+    console.log("Service: inside createCheque", tokenData, payload);
+    // return;
     let response;
     if(tokenData.userId === payload.genratedPersonId){
       const userDataExist = await bankDao.getById( bankId,{});

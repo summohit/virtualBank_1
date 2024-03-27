@@ -28,7 +28,7 @@ module.exports.addQRCode = async (payload, tokenData, jwtToken) => {
     const createdData = await uploadQRDao.insert(data);
     console.log("createdData", createdData);
     payload["_id"] = createdData._id;
-    payload["userId"] = createdData.userId;
+    payload["genratedPersonId"] = tokenData.userId;
     await generateAndSaveBankDetailQR(payload);
     let responseMsg = "QR Code created successfully";
     let response = createResponseObj(responseMsg, 201, null);

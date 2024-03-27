@@ -11,6 +11,9 @@ module.exports.addCard = async (payload, tokenData, jwtToken) => {
 
     let response;
     console.log("Service: inside addCard");
+    console.log("payload: ",payload);
+    console.log("tokenData: ",tokenData);
+
     if(tokenData.userId === payload.userId){
       if (payload.cardNumber !== payload.confirmCardNumber) {
         let error = "Card Number is incorrect";

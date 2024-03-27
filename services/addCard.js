@@ -8,27 +8,35 @@ const { createResponseObj } = require("../utils/common");
 
 module.exports.addCard = async (payload, tokenData, jwtToken) => {
   try {
+
+    let response;
     console.log("Service: inside addCard");
-    if (payload.cardNumber !== payload.confirmCardNumber) {
-      let error = "Card Number is incorrect";
-      let response = createResponseObj(error, 400);
-      console.log(response);
+    if(tokenData.userId === payload.userId){
+      if (payload.cardNumber !== payload.confirmCardNumber) {
+        let error = "Card Number is incorrect";
+        let response = createResponseObj(error, 400);
+        console.log(response);
+        return response;
+      }
+      const cardAlredyExist = await addCardDao.getByCardNumber(
+        payload.cardNumber
+      );
+      if (cardAlredyExist) {
+        let error = "Card Number already registered";
+        let response = createResponseObj(error, 400);
+        console.log(response);
+        return response;
+      }
+      payload["userId"] = tokenData.userId;
+      let createdAddCardData = await addCardDao.insert(payload);
+      let responseMsg = "Card added successfully";
+        response = createResponseObj(responseMsg, 201, null);
       return response;
-    }
-    const cardAlredyExist = await addCardDao.getByCardNumber(
-      payload.cardNumber
-    );
-    if (cardAlredyExist) {
-      let error = "Card Number already registered";
+    }else{
+      let error = "access Deny to unauthorized user.";
       let response = createResponseObj(error, 400);
-      console.log(response);
-      return response;
+      return response; 
     }
-    payload["userId"] = tokenData.userId;
-    let createdAddCardData = await addCardDao.insert(payload);
-    let responseMsg = "Card added successfully";
-    let response = createResponseObj(responseMsg, 201, null);
-    return response;
   } catch (error) {
     if (error.response) {
       let errorMessage = error.response.data.message;

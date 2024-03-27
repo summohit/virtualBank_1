@@ -11,22 +11,30 @@ const { createResponseObj } = require("../utils/common");
 module.exports.createBank = async (payload, tokenData, jwtToken) => {
   try {
     console.log("Service: inside createBank");
-    const defaultBankData = await bankDao.getBankByUserIdAndStatus(
-      tokenData.userId,
-      {}
-    );
-    if (defaultBankData) {
-      let updateDatedPayload = { isDefaultBank: false };
-      await bankDao.updateById(defaultBankData._id, updateDatedPayload);
+    let result;
+    if(tokenData.userId === payload.userId){
+      const defaultBankData = await bankDao.getBankByUserIdAndStatus(
+        tokenData.userId,
+        {}
+      );
+      if (defaultBankData) {
+        let updateDatedPayload = { isDefaultBank: false };
+        await bankDao.updateById(defaultBankData._id, updateDatedPayload);
+      }
+      const staticBankData = await StaticBankDao.getById(payload.bankId, {});
+      payload["userId"] = tokenData.userId;
+      payload["bankName"] = staticBankData.bankName;
+  
+      const bankData = await bankDao.insert(payload);
+      let responseMsg = "Bank created successfully";
+      result = createResponseObj(responseMsg, 201, null);
+      return result;
+    }else{
+      let error = "access Deny to unauthorized user.";
+      let response = createResponseObj(error, 400);
+      return response; 
     }
-    const staticBankData = await StaticBankDao.getById(payload.bankId, {});
-    payload["userId"] = tokenData.userId;
-    payload["bankName"] = staticBankData.bankName;
-
-    const bankData = await bankDao.insert(payload);
-    let responseMsg = "Bank created successfully";
-    let response = createResponseObj(responseMsg, 201, null);
-    return response;
+   
   } catch (error) {
     if (error.response) {
       let errorMessage = error.response.data.message;

@@ -7,10 +7,12 @@ const createCheque = async (req, res) => {
     console.log("Controller: inside createCheque");
     let bankNumber = req.params.bankNumber;
     let numberOfCheque = req.body.chequeCount
+    let reqData = req.body;
     let result = await chequeService.createCheque(
       numberOfCheque,
       bankNumber,
       req.user,
+      reqData,
       req.headers["authorization"]
     );
     console.log("result", result);

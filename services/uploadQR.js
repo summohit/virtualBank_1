@@ -56,6 +56,7 @@ module.exports.createChequeQr = async (payload, tokenData, jwtToken) => {
     };
     const createdData = await uploadCheckQRDao.insert(data);
     payload["_id"] = createdData._id;
+    payload["genratedPersonId"] = tokenData.userId;
     await generateAndSaveChequeQR(payload);
     let responseMsg = "QR Code created successfully";
     let response = createResponseObj(responseMsg, 201, null);

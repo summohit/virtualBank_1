@@ -14,7 +14,7 @@ module.exports.addCard = async (payload, tokenData, jwtToken) => {
     console.log("payload: ",payload);
     console.log("tokenData: ",tokenData);
 
-    if(tokenData.userId === payload.userId){
+    if(tokenData.userId === payload.genratedPersonId){
       if (payload.cardNumber !== payload.confirmCardNumber) {
         let error = "Card Number is incorrect";
         let response = createResponseObj(error, 400);

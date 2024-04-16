@@ -26,6 +26,11 @@ module.exports.createTransaction = async (payload, tokenData, jwtToken) => {
     const getSendCardDetail = await addCardDao.customQuery({
       bank: payload.senderdBankId,
     });
+    if (getSendCardDetail.length==0) {
+      let error = "Please add your card first";
+      let response = createResponseObj(error, 400);
+      return response;
+    }
     const sendCard = getSendCardDetail[0];
     console.log("getCardById of reciver", getSendCardDetail);
     if (sendCard.status === 0) {
@@ -76,7 +81,7 @@ module.exports.createTransaction = async (payload, tokenData, jwtToken) => {
       },
     });
     console.log("res.data.body", res.data.body.transactionPassword);
-    console.log(" payload.transactionPassword",  payload.transactionPassword);
+    console.log(" payload.transactionPassword", payload.transactionPassword);
     const isMatched = await compare(
       payload.transactionPassword,
       res.data.body.transactionPassword

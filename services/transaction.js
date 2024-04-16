@@ -11,7 +11,8 @@ const { createResponseObj } = require("../utils/common");
 module.exports.createTransaction = async (payload, tokenData, jwtToken) => {
   try {
     console.log("Service: inside create transaction", payload);
-    let balance = parseInt(payload.balance);
+    payload['balance'] = payload.amount;
+    let balance =parseInt(payload.balance);
     console.log("balance to be deducted", balance);
     //  payload["balance"] = parseInt(payload.balance);
     let senderdBankId = payload.senderdBankId;
@@ -21,7 +22,15 @@ module.exports.createTransaction = async (payload, tokenData, jwtToken) => {
       {}
     );
     console.log("bankDetail of sender", bankDetail);
-    if (!bankDetail) {
+    const getSendCardDetail = await addCardDao.customQuery({"bank":payload.senderdBankId});
+    const sendCard = getSendCardDetail[0];
+    console.log("getCardById of reciver", getSendCardDetail);
+    if(sendCard.status === 0){
+      let error = "Please Activate your card and try again!!";
+      let response = createResponseObj(error, 400);
+      return response;
+    }
+     if (!bankDetail) {
       let error = "Account does not exist with this sender bankId";
       let response = createResponseObj(error, 400);
       return response;

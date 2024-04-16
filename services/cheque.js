@@ -17,45 +17,54 @@ module.exports.createCheque = async (
   numberOfCheque,
   bankId,
   tokenData,
+  payload,
   jwtToken
 ) => {
   try {
-    console.log("Service: inside createCheque");
-    const userDataExist = await bankDao.getById( bankId,{});
-
-    if (!userDataExist) {
-      let error = "User does not registered with this bank";
-      let response = createResponseObj(error, 400);
-      return response;
-    }
-    const bankRegisteredWithUser = userDataExist;
-    let chequeBookPayload = {
-      bankId: bankRegisteredWithUser._id,
-      userId: tokenData.userId,
-      numberOfPages: numberOfCheque,
-    };
-
-    const chequeBookData = await chequeBookDao.insert(chequeBookPayload);
-    console.log("chequeBookData", chequeBookData);
-    await generateAndSaveChequeBookQrCode(chequeBookData);
-    let payload = {
-      chequeBookId: chequeBookData._id,
-      bankId: bankRegisteredWithUser._id,
-      // chequeNumber:
-    };
-    for (let i = 0; i < numberOfCheque; i++) {
-      payload["chequeNumber"] = `"18025` + (i + 1) + `"  110259008 : 066000"`;
-      console.log("payload", payload);
-      let chequeData = await chequeDao.insert(payload);
-      let qrCodePayload = {
-        chequeStatus: chequeData.chequeStatus,
-        chequeId: chequeData._id,
+    console.log("Service: inside createCheque", tokenData, payload);
+    // return;
+    let response;
+    if(tokenData.userId === payload.genratedPersonId){
+      const userDataExist = await bankDao.getById( bankId,{});
+      if (!userDataExist) {
+        let error = "User does not registered with this bank";
+        let response = createResponseObj(error, 400);
+        return response;
+      }
+      const bankRegisteredWithUser = userDataExist;
+      let chequeBookPayload = {
+        bankId: bankRegisteredWithUser._id,
+        userId: tokenData.userId,
+        numberOfPages: numberOfCheque,
       };
-      await generateAndSaveChequeQrCode(qrCodePayload);
+  
+      const chequeBookData = await chequeBookDao.insert(chequeBookPayload);
+      console.log("chequeBookData", chequeBookData);
+      await generateAndSaveChequeBookQrCode(chequeBookData);
+      let payload = {
+        chequeBookId: chequeBookData._id,
+        bankId: bankRegisteredWithUser._id,
+        // chequeNumber:
+      };
+      for (let i = 0; i < numberOfCheque; i++) {
+        payload["chequeNumber"] = `"18025` + (i + 1) + `"  110259008 : 066000"`;
+        console.log("payload", payload);
+        let chequeData = await chequeDao.insert(payload);
+        let qrCodePayload = {
+          chequeStatus: chequeData.chequeStatus,
+          chequeId: chequeData._id,
+        };
+        await generateAndSaveChequeQrCode(qrCodePayload);
+      }
+      let responseMsg = "Cheques created successfully";
+        response = createResponseObj(responseMsg, 201, null);
+      return response;
+    }else{
+      let error = "access Deny to unauthorized user.";
+      let response = createResponseObj(error, 400);
+      return response; 
     }
-    let responseMsg = "Cheques created successfully";
-    let response = createResponseObj(responseMsg, 201, null);
-    return response;
+   
   } catch (error) {
     if (error.response) {
       let errorMessage = error.response.data.message;

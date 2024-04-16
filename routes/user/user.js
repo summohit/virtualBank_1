@@ -17,7 +17,7 @@ Router.post("/createUser",registrationValidation, createUser);
 
 Router.put("/updateProfile",verifyKey, updateProfile);
 
-Router.put("/updateServiceStatus", verifyKey, updateServiceStatus);
+Router.post("/updateServiceStatus", verifyKey, updateServiceStatus);
 
 // Router.post("/uploadProfileImage", verifyKey,upload.single("profileImage"), uploadProfileImage);
 

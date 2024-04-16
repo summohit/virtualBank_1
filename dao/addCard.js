@@ -78,6 +78,15 @@ const deleteByAddedCardId = async (addedCardId) => {
     console.log(error.stack);
   }
 };
+const customQuery = async (query) => {
+  try {
+    console.log(query);
+    let result = await addCardModel.find(query);
+    return result;
+  } catch (error) {
+    console.log(error.stack);
+  }
+};
 module.exports = {
   insert,
   getAll,
@@ -87,4 +96,5 @@ module.exports = {
   getByCardNumber,
   getByEmail,
   deleteByAddedCardId,
+  customQuery
 };

@@ -26,7 +26,9 @@ module.exports.addQRCode = async (payload, tokenData, jwtToken) => {
     if (payload.type === "bank") data["staticBankId"] = payload.bankId;
     else data["dynamicBankId"] = payload.bankId;
     const createdData = await uploadQRDao.insert(data);
+    console.log("createdData", createdData);
     payload["_id"] = createdData._id;
+    payload["genratedPersonId"] = tokenData.userId;
     await generateAndSaveBankDetailQR(payload);
     let responseMsg = "QR Code created successfully";
     let response = createResponseObj(responseMsg, 201, null);
@@ -51,9 +53,11 @@ module.exports.createChequeQr = async (payload, tokenData, jwtToken) => {
       bank: payload.bank,
       leaf: payload.leaf,
       alias: payload.alias,
+      genratedPersonId : tokenData.userId
     };
     const createdData = await uploadCheckQRDao.insert(data);
     payload["_id"] = createdData._id;
+    payload["genratedPersonId"] = tokenData.userId;
     await generateAndSaveChequeQR(payload);
     let responseMsg = "QR Code created successfully";
     let response = createResponseObj(responseMsg, 201, null);

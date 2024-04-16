@@ -136,7 +136,7 @@ module.exports.fillCheque = async (payload, tokenData, jwtToken) => {
   }
 };
 
-module.exports.updateChequeStatus = async (payload, tokenData, jwtToken) => {
+module.exports.updateHospitalById = async (payload, tokenData, jwtToken) => {
   try {
     console.log("Service: inside fillCheque");
     let { chequeId, ...chequeData } = payload;

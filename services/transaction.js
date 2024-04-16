@@ -11,11 +11,15 @@ const { createResponseObj } = require("../utils/common");
 module.exports.createTransaction = async (payload, tokenData, jwtToken) => {
   try {
     console.log("Service: inside create transaction", payload);
-    let balance =parseInt(payload.balance);
+    let balance = parseInt(payload.balance);
     console.log("balance to be deducted", balance);
-  //  payload["balance"] = parseInt(payload.balance);
+    //  payload["balance"] = parseInt(payload.balance);
     let senderdBankId = payload.senderdBankId;
     const bankDetail = await bankDao.getById(senderdBankId, {});
+    const recieverBankDetail = await bankDao.getByAccountNumber(
+      payload.recieverAccountNumber,
+      {}
+    );
     console.log("bankDetail of sender", bankDetail);
     if (!bankDetail) {
       let error = "Account does not exist with this sender bankId";
@@ -43,11 +47,16 @@ module.exports.createTransaction = async (payload, tokenData, jwtToken) => {
       {}
     );
     console.log("recieverBankDetails", recieverBankDetails);
-    // if (!recieverBankDetails) {
-    //   let error = "User does not exist with this account number";
-    //   let response = createResponseObj(error, 400);
-    //   return response;
-    // }
+    if (!recieverBankDetails) {
+      let error = "Account does not exist with this reciever account number";
+      let response = createResponseObj(error, 400);
+      return response;
+    }
+    if (payload.recieverIfscCode !== recieverBankDetails.ifscCode) {
+      let error = "IFSC code of reciever bank account is incorrect";
+      let response = createResponseObj(error, 400);
+      return response;
+    }
     await bankDao.updateByAccountNumber(
       bankDetail.accountNumber,
       balance,

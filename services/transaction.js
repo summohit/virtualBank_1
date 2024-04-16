@@ -2,6 +2,7 @@ const customError = require("../helper/customeError");
 const mongoose = require("mongoose");
 const addCardDao = require("../dao/addCard");
 const userDao = require("../dao/userDao");
+const { hash, compare } = require("bcryptjs");
 const bankDao = require("../dao/bankDao");
 const transactionHistoryDao = require("../dao/transactionHistoryDao");
 const axios = require("axios");
@@ -11,8 +12,8 @@ const { createResponseObj } = require("../utils/common");
 module.exports.createTransaction = async (payload, tokenData, jwtToken) => {
   try {
     console.log("Service: inside create transaction", payload);
-    payload['balance'] = payload.amount;
-    let balance =parseInt(payload.balance);
+    payload["balance"] = payload.amount;
+    let balance = parseInt(payload.balance);
     console.log("balance to be deducted", balance);
     //  payload["balance"] = parseInt(payload.balance);
     let senderdBankId = payload.senderdBankId;
@@ -22,26 +23,28 @@ module.exports.createTransaction = async (payload, tokenData, jwtToken) => {
       {}
     );
     console.log("bankDetail of sender", bankDetail);
-    const getSendCardDetail = await addCardDao.customQuery({"bank":payload.senderdBankId});
+    const getSendCardDetail = await addCardDao.customQuery({
+      bank: payload.senderdBankId,
+    });
     const sendCard = getSendCardDetail[0];
     console.log("getCardById of reciver", getSendCardDetail);
-    if(sendCard.status === 0){
+    if (sendCard.status === 0) {
       let error = "Please Activate your card and try again!!";
       let response = createResponseObj(error, 400);
       return response;
     }
-     if (!bankDetail) {
+    if (!bankDetail) {
       let error = "Account does not exist with this sender bankId";
       let response = createResponseObj(error, 400);
       return response;
     }
     if (payload.recieverAccountNumber === bankDetail.accountNumber) {
-      let error = "Sender and reciever account should not be same";
+      let error = "Sender and beneficiary account should not be same";
       let response = createResponseObj(error, 400);
       return response;
     }
     if (bankDetail.ifscCode === payload.recieverIfscCode) {
-      let error = "Sender and reciever IFSC code should not be same";
+      let error = "Sender and beneficiary IFSC code should not be same";
       let response = createResponseObj(error, 400);
       return response;
     }
@@ -57,12 +60,29 @@ module.exports.createTransaction = async (payload, tokenData, jwtToken) => {
     );
     console.log("recieverBankDetails", recieverBankDetails);
     if (!recieverBankDetails) {
-      let error = "Account does not exist with this reciever account number";
+      let error = "Account does not exist with this beneficiary account number";
       let response = createResponseObj(error, 400);
       return response;
     }
     if (payload.recieverIfscCode !== recieverBankDetails.ifscCode) {
-      let error = "IFSC code of reciever bank account is incorrect";
+      let error = "IFSC code of beneficiary is incorrect";
+      let response = createResponseObj(error, 400);
+      return response;
+    }
+    const apiUrl = `${env.baseUrl}/api/user/getAccDetail`;
+    let res = await axios.get(apiUrl, {
+      headers: {
+        Authorization: jwtToken,
+      },
+    });
+    console.log("res.data.body", res.data.body.transactionPassword);
+    console.log(" payload.transactionPassword",  payload.transactionPassword);
+    const isMatched = await compare(
+      payload.transactionPassword,
+      res.data.body.transactionPassword
+    );
+    if (!isMatched) {
+      let error = "Invalid transaction password";
       let response = createResponseObj(error, 400);
       return response;
     }

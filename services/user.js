@@ -265,7 +265,7 @@ module.exports.loginUser = async (data) => {
       console.log("user exsist", userData);
     }
 
-    if(userData.deviceId === data.deviceId){
+    if(userData.deviceId !== data.deviceId){
       let error = "User logged in from a different device. Please log out from that device first."
       let response = createResponseObj(error, 400);
       return response;

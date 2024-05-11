@@ -132,10 +132,63 @@ const loginUser = async (req, res) => {
   }
 };
 
+const logOut = async (req, res) => {
+  try {
+    console.log("Controller: inside logOut",req.user);
+    let result = await user.logOut(req.user);
+    console.log("result", result);
+    if (result.statusCode == 200 || result.statusCode == 201) {
+      return res
+        .status(result.statusCode)
+        .send(
+          apiResponse.successResponse(
+            result.data,
+            constants.defaultResponseMessage.LOGIN,
+            result.statusCode
+          )
+        );
+    } else {
+      return res
+        .status(result.statusCode)
+        .send(apiResponse.errorResponse(result.message, result.statusCode));
+    }
+  } catch (error) {
+    console.log(error.stack);
+  }
+};
 const updateProfile = async (req, res) => {
   try {
     console.log("Controller: inside updateProfile");
     let result = await user.updateUserProfile(
+      req.body,
+      req.user,
+      req.headers["authorization"]
+    );
+    console.log("result", result);
+    if (result.statusCode == 200 || result.statusCode == 201) {
+      return res
+        .status(result.statusCode)
+        .send(
+          apiResponse.successResponse(
+            result.data,
+            constants.defaultResponseMessage.UPDATED,
+            result.statusCode
+          )
+        );
+    } else {
+      return res
+        .status(result.statusCode)
+        .send(apiResponse.errorResponse(result.message, result.statusCode));
+    }
+  } catch (error) {
+    console.log(error.stack);
+  }
+};
+
+const updateDeviceId = async (req, res) => {
+  try {
+    console.log("Controller: inside updateDeviceId");
+    let result = await user.updateDeviceId(
       req.body,
       req.user,
       req.headers["authorization"]
@@ -253,4 +306,6 @@ module.exports = {
   getCardDetails,
   updateServiceStatus,
   getUserQrCode,
+  updateDeviceId,
+  logOut
 };

@@ -129,7 +129,27 @@ module.exports.updateUserProfile = async (data, tokenData, jwtToken) => {
     throw new customError(error, error.statusCode);
   }
 };
-
+module.exports.updateDeviceId = async (data, tokenData, jwtToken) => {
+  try {
+    console.log("Service: inside updateDeviceId");
+    console.log(data);
+    let profileData = {
+      deviceId: data.deviceId,
+    };
+    const isUserExist = await userDao.getById(tokenData.userId, {});
+    if (isUserExist && isUserExist.deviceId) {
+      let error = "User already logged in diffrent application";
+      let response = createResponseObj(error, 400);
+      return response;
+    }
+    await userDao.updateById(tokenData.userId, profileData);
+    let response = createResponseObj(null, 200, null);
+    return response;
+  } catch (error) {
+    console.log("Something went wrong: Service: blog", error);
+    throw new customError(error, error.statusCode);
+  }
+};
 //getCardDetails
 module.exports.getCardDetails = async (tokenData, jwtToken) => {
   try {
@@ -241,7 +261,16 @@ module.exports.loginUser = async (data) => {
       let error = "User does not exist";
       let response = createResponseObj(error, 400);
       return response;
+    }else{
+      console.log("user exsist", userData);
     }
+
+    if(userData.deviceId === data.deviceId){
+      let error = "User logged in from a different device. Please log out from that device first."
+      let response = createResponseObj(error, 400);
+      return response;
+    }
+
     const userId = userData._id;
     const apiUrl = `${env.baseUrl}/api/user/userPassword/${userId}`;
     let res = await axios.get(apiUrl);
@@ -256,6 +285,10 @@ module.exports.loginUser = async (data) => {
       let tokenData = {
         token: "JWT " + token,
       };
+      let tmpPayload = {
+        "token": tokenData.token,
+      }
+      await userDao.updateById(userId, tmpPayload);
       let result = createResponseObj(null, 200, tokenData);
       return result;
     }
@@ -264,7 +297,17 @@ module.exports.loginUser = async (data) => {
     throw new customError(error, error.statusCode);
   }
 };
-
+module.exports.logOut = async (tokenData) => {
+  try {
+     console.log("tokenData.userId", tokenData.userId);
+     await userDao.logOutUser(tokenData.userId);
+     let result = createResponseObj(null, 201, tokenData);
+     return result;
+  } catch (error) {
+    console.log("Something went wrong: Service: blog", error);
+    throw new customError(error, error.statusCode);
+  }
+};
 module.exports.deleteUserData = async (mobileNumber) => {
   try {
     console.log("Service: inside deleteUserData");

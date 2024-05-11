@@ -64,6 +64,22 @@ const updateById = async (userId, payload) => {
   }
 };
 
+const logOutUser = async (userId) => {
+  try {
+    let data = {
+      "token" :"",
+      "deviceId":""
+    }
+    let result = await userModel.updateOne(
+      { _id: userId },
+      { $set:data}
+    );
+    return result;
+  } catch (error) {
+    console.log(error.stack);
+  }
+};
+
 const deleteById = async (roleId) => {
   try {
     let result = await teamModel.deleteOne({ _id: roleId });
@@ -90,4 +106,5 @@ module.exports = {
   getByMobileNumber,
   getByEmail,
   deleteByMobileNumber,
+  logOutUser
 };

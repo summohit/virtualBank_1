@@ -9,6 +9,8 @@ const {
   getCardDetails,
   updateServiceStatus,
   getUserQrCode,
+  updateDeviceId,
+  logOut
 } = require("../../controllers/user/user");
 const { verifyKey } = require("../../helper/auth/auth");
 const { registrationValidation } = require("../../middlewares/userValidation");
@@ -31,5 +33,11 @@ Router.get("/getUserQrCode", verifyKey, getUserQrCode);
 Router.delete("/deleteUser/:mobileNumber", deleteUserData);
 
 Router.post("/login", loginUser);
+
+Router.get("/logout",verifyKey, logOut);
+
+
+
+Router.post("/updateUserDeviceId",verifyKey, updateDeviceId);
 
 module.exports = Router;

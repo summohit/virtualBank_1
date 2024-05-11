@@ -264,12 +264,14 @@ module.exports.loginUser = async (data) => {
     }else{
       console.log("user exsist", userData);
     }
-
-    if(userData.deviceId !== data.deviceId){
-      let error = "User logged in from a different device. Please log out from that device first."
-      let response = createResponseObj(error, 400);
-      return response;
+    if(userData.hasOwnProperty('deviceId') && !userData.deviceId){
+      if(userData.deviceId !== data.deviceId){
+        let error = "User logged in from a different device. Please log out from that device first."
+        let response = createResponseObj(error, 400);
+        return response;
+      }
     }
+ 
 
     const userId = userData._id;
     const apiUrl = `${env.baseUrl}/api/user/userPassword/${userId}`;

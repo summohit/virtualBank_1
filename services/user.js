@@ -268,16 +268,17 @@ module.exports.loginUser = async (data) => {
     console.log("data.deviceId",data.deviceId);
     console.log(userData.deviceId !== data.deviceId);
     console.log(userData['deviceId']);
-
-    if(userData.deviceId !== undefined && userData.deviceId != '') {
-      console.log("deviceId key found")
-      if(userData.deviceId !=  data.deviceId){
-        let error = "User logged in from a different device. Please log out from that device first."
-        let response = createResponseObj(error, 400);
-        return response;
+    if(data && !data.isWebLoggedIn){
+      if(userData.deviceId !== undefined && userData.deviceId != '') {
+        console.log("deviceId key found")
+        if(userData.deviceId !=  data.deviceId){
+          let error = "User logged in from a different device. Please log out from that device first."
+          let response = createResponseObj(error, 400);
+          return response;
+        }
       }
     }
-
+  
     const userId = userData._id;
     const apiUrl = `${env.baseUrl}/api/user/userPassword/${userId}`;
     let res = await axios.get(apiUrl);
@@ -291,6 +292,8 @@ module.exports.loginUser = async (data) => {
       const token = await generateAuthKey(userData);
       let tokenData = {
         token: "JWT " + token,
+        "userData": userData
+
       };
       let tmpPayload = {
         "token": tokenData.token,
@@ -304,6 +307,7 @@ module.exports.loginUser = async (data) => {
     throw new customError(error, error.statusCode);
   }
 };
+ 
 module.exports.logOut = async (tokenData) => {
   try {
      console.log("tokenData.userId", tokenData.userId);

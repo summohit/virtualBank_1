@@ -34,6 +34,8 @@ Router.delete("/deleteUser/:mobileNumber", deleteUserData);
 
 Router.post("/login", loginUser);
 
+ 
+
 Router.get("/logout",verifyKey, logOut);
 
 

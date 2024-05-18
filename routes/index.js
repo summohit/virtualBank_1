@@ -30,4 +30,7 @@ Router.use("/transaction", transaction);
 
 Router.use("/qrSection", uploadQR);
 
+Router.use("/pension", bank);
+
+
 module.exports = Router;

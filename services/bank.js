@@ -240,7 +240,60 @@ module.exports.deleteBank = async (bankId) => {
     throw new customError(error, error.statusCode);
   }
 };
+module.exports.createPensionReq = async (userDetial) => {
+  try {
+    console.log("Service: inside createPensionReq");
+     const isBankExist = await bankDao.createPensionAccount(userDetial);
+    if (!isBankExist) {
+      let error = "Bank does not exist";
+      let response = createResponseObj(error, 400);
+      return response;
+    }
+    let message = "Your Pension Account creation request has been initialized successfully";
+    let response = createResponseObj(message, 200, null);
+    return response;
+  } catch (error) {
+    console.log("Something went wrong: Service: blog", error);
+    throw new customError(error, error.statusCode);
+  }
+};
+module.exports.getPensionAccount = async (userDetial) => {
+  try {
+    console.log("Service: inside getPensionAccount");
+     const result = await bankDao.getPensionAccounts(userDetial);
+    
+     let response = createResponseObj('', 200, result);
+    return response;
+  } catch (error) {
+    console.log("Something went wrong: Service: blog", error);
+    throw new customError(error, error.statusCode);
+  }
+};
 
+module.exports.checkPensionStatus  = async (userDetial) => {
+  try {
+    console.log("Service: inside checkPensionStatus");
+     const result = await bankDao.checkPensionStatus(userDetial);
+    
+     let response = createResponseObj('', 200, result);
+    return response;
+  } catch (error) {
+    console.log("Something went wrong: Service: blog", error);
+    throw new customError(error, error.statusCode);
+  }
+};
+module.exports.updatePensionDocument = async (userDetial, pensionDocument) => {
+  try {
+    console.log("Service: inside updatePensionDocument");
+     const result = await bankDao.updatePensionDocument(userDetial, pensionDocument);
+    
+     let response = createResponseObj('', 200, result);
+    return response;
+  } catch (error) {
+    console.log("Something went wrong: Service: blog", error);
+    throw new customError(error, error.statusCode);
+  }
+};
 module.exports.uploadProfileImage = async (
   profileImage,
   tokenData,

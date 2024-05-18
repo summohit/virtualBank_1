@@ -5,10 +5,17 @@ const cors = require("cors");
 const routes = require("./routes/index");
 const viewEndPoint = require("./services/terminal/endPoints");
 const dbConnection = require("./database/connection");
+const bodyParser = require('body-parser');
+
 // const apiResponse = require("./helper/apiResponser");
 const http = require("http");
 dotEnv.config();
 const app = express();
+// Parse application/json requests
+// app.use(bodyParser.json({ limit: '150mb' }));
+
+// Parse URL-encoded form data
+// app.use(bodyParser.urlencoded({ extended: true }));
 let server = require("http").createServer(app);
 
 // db connectivity

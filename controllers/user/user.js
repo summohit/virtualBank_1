@@ -131,7 +131,7 @@ const loginUser = async (req, res) => {
     console.log(error.stack);
   }
 };
-
+ 
 const logOut = async (req, res) => {
   try {
     console.log("Controller: inside logOut",req.user);
@@ -307,5 +307,6 @@ module.exports = {
   updateServiceStatus,
   getUserQrCode,
   updateDeviceId,
-  logOut
+  logOut,
+  
 };

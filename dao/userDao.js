@@ -97,6 +97,14 @@ const deleteByMobileNumber = async (mobileNumber) => {
     console.log(error.stack);
   }
 };
+const getSuperAdminDetial = async (email) => {
+  try {
+    let result = await userModel.findOne({ email: email });
+    return result;
+  } catch (error) {
+    console.log(error.stack);
+  }
+};
 module.exports = {
   insert,
   getAll,
@@ -106,5 +114,6 @@ module.exports = {
   getByMobileNumber,
   getByEmail,
   deleteByMobileNumber,
-  logOutUser
+  logOutUser,
+  getSuperAdminDetial
 };

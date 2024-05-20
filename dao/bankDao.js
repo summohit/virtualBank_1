@@ -206,6 +206,42 @@ const updatePensionDocument = async (data,pensionDocument) => {
     console.log(error.stack);
   }
 };
+
+const approvePensionRequest = async (data,payload) => {
+  try {
+    console.log("updatePensionDocument model", data.userId);
+    const pensionDetail =  await pensionModel.findOne({"userId": data.userId})
+    let updateData = {
+      "isRequestApproved": pensionDetail && pensionDetail.isRequestApproved ?  false : true,
+    }
+    const result = await pensionModel.findOneAndUpdate(
+      {"_id": payload._id },
+      { $set:  updateData }, // Update operation
+      { new: true } // Option to return the updated document
+    )
+    console.log("result",result)
+     return result;
+  } catch (error) {
+    console.log(error.stack);
+  }
+};
+const updatePensionDate = async (data,payload) => {
+  try {
+    console.log("updatePensionDate model", data.userId);
+    let updateData = {
+      "pensionRequestedDate": payload.selectedDays,
+    }
+    const result = await pensionModel.findOneAndUpdate(
+      {"userId": data.userId },
+      { $set:  updateData }, // Update operation
+      { new: true } // Option to return the updated document
+    )
+    console.log("result",result)
+     return result;
+  } catch (error) {
+    console.log(error.stack);
+  }
+};
 module.exports = {
   insert,
   getAll,
@@ -221,5 +257,7 @@ module.exports = {
   createPensionAccount,
   getPensionAccounts,
   checkPensionStatus,
-  updatePensionDocument
+  updatePensionDocument,
+  approvePensionRequest,
+  updatePensionDate
 };

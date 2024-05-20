@@ -19,6 +19,9 @@ const pensionSchema = new mongoose.Schema(
     rightImg:  {
       type: String,
     },
+    pensionRequestedDate:  {
+      type: String,
+    },
     leftImg:  {
       type: String,
     }, centerImg:  {

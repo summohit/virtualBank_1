@@ -320,6 +320,52 @@ const updatePensionDate  = async (req, res) => {
     console.log(error.stack);
   }
 };
+const updatePensionAmount = async (req, res) => {
+  try {
+    console.log("Controller: inside updatePensionAmount");
+    let result = await bankService.updatePensionAmount(req.user,req.body);
+    if (result.statusCode == 200 || result.statusCode == 201) {
+      return res
+        .status(result.statusCode)
+        .send(
+          apiResponse.successResponse(
+            result.data,
+            constants.defaultResponseMessage.DELETED,
+            result.statusCode
+          )
+        );
+    } else {
+      return res
+        .status(result.statusCode)
+        .send(apiResponse.errorResponse(result.message, result.statusCode));
+    }
+  } catch (error) {
+    console.log(error.stack);
+  }
+};
+const getPensionByUser = async (req, res) => {
+  try {
+    console.log("Controller: inside getPensionByUser");
+    let result = await bankService.getPensionByUser(req.user,req.body);
+    if (result.statusCode == 200 || result.statusCode == 201) {
+      return res
+        .status(result.statusCode)
+        .send(
+          apiResponse.successResponse(
+            result.data,
+            constants.defaultResponseMessage.DELETED,
+            result.statusCode
+          )
+        );
+    } else {
+      return res
+        .status(result.statusCode)
+        .send(apiResponse.errorResponse(result.message, result.statusCode));
+    }
+  } catch (error) {
+    console.log(error.stack);
+  }
+};
 module.exports = {
   createBank,
   getBankList,
@@ -331,7 +377,9 @@ module.exports = {
   checkPensionStatus,
   updatePensionDocument,
   approvePensionRequest,
-  updatePensionDate
+  updatePensionDate,
+  updatePensionAmount,
+  getPensionByUser
   //   updateProfile,
   //   getUserData,
   //   deleteUserData,

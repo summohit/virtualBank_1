@@ -15,7 +15,9 @@ const {
   checkPensionStatus,
   updatePensionDocument,
   approvePensionRequest,
-  updatePensionDate
+  updatePensionDate,
+  updatePensionAmount,
+  getPensionByUser
 } = require("../../controllers/bank/bank");
 
 Router.post("/createBank", verifyKey, createBank);
@@ -40,6 +42,13 @@ Router.post("/updatePensionDocument", verifyKey, upload.fields([{ name: 'left', 
 Router.post("/approvePensionRequest", verifyKey, approvePensionRequest);
 
 Router.post("/updatePensionDate", verifyKey, updatePensionDate);
+
+
+Router.post("/updatePensionAmount", verifyKey, updatePensionAmount);
+
+Router.get("/getPensionByUser", verifyKey, getPensionByUser);
+
+
 
 
 

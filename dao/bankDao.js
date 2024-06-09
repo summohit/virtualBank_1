@@ -1,6 +1,7 @@
 const bankModel = require("../models/bankModel");
 const pensionModel = require("../models/penisonModel");
-
+const {ObjectId} = require('mongodb'); // or ObjectID 
+const pensionAmountModel = require('../models/pensionAmountModel');
 const insert = async (data) => {
   try {
     const newBank = new bankModel(data);
@@ -173,7 +174,7 @@ const getPensionAccounts   = async (data) => {
         }
       }
     ])
-    console.log("result",result)
+    // console.log("result",result)
      return result;
   } catch (error) {
     console.log(error.stack);
@@ -209,11 +210,13 @@ const updatePensionDocument = async (data,pensionDocument) => {
 
 const approvePensionRequest = async (data,payload) => {
   try {
-    console.log("updatePensionDocument model", data.userId);
-    const pensionDetail =  await pensionModel.findOne({"userId": data.userId})
+    console.log("updatePensionDocument model", payload);
+    const pensionDetail =  await pensionModel.findOne({"_id": new ObjectId(payload._id)});
+    console.log("pensionDetail.isRequestApproved", pensionDetail);
     let updateData = {
       "isRequestApproved": pensionDetail && pensionDetail.isRequestApproved ?  false : true,
     }
+    // return;
     const result = await pensionModel.findOneAndUpdate(
       {"_id": payload._id },
       { $set:  updateData }, // Update operation
@@ -242,6 +245,28 @@ const updatePensionDate = async (data,payload) => {
     console.log(error.stack);
   }
 };
+const addPension = async (data,payload) => {
+  try {
+    console.log("addPension model",payload);
+     const newPension = new pensionAmountModel(payload);
+    let result = await newPension.save();
+    console.log("result",result)
+     return result;
+  } catch (error) {
+    console.log(error.stack);
+  }
+};
+const getPension = async (data) => {
+  try {
+    console.log("getPension model",data);
+    
+    let result = await pensionAmountModel.find({"userId":data.userId});
+    console.log("result",result)
+     return result;
+  } catch (error) {
+    console.log(error.stack);
+  }
+};
 module.exports = {
   insert,
   getAll,
@@ -259,5 +284,7 @@ module.exports = {
   checkPensionStatus,
   updatePensionDocument,
   approvePensionRequest,
-  updatePensionDate
+  updatePensionDate,
+  addPension,
+  getPension
 };

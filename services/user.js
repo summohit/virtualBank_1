@@ -9,6 +9,14 @@ const { createResponseObj } = require("../utils/common");
 const { generateAuthKey } = require("../helper/auth/jwt");
 const { uploadProfileImage } = require("../helper/saveQRcode");
 const { generateAndSaveUserQrCode } = require("../helper/saveQRcode");
+var admin = require("firebase-admin");
+
+var serviceAccount = require("../serviceAccountKey.json");
+console.log("serviceAccount", serviceAccount)
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount)
+});
+
 
 module.exports.createUser = async (data, adminId) => {
   try {
@@ -18,6 +26,7 @@ module.exports.createUser = async (data, adminId) => {
       mobileNumber: data.mobileNumber,
       email: data.email,
       deviceData: data.deviceData,
+      fcmToken: data.fcmToken
     };
     const isMobileNumExist = await userDao.getByMobileNumber(data.mobileNumber);
     if (isMobileNumExist) {
@@ -77,11 +86,37 @@ module.exports.updateServiceStatus = async (data, tokenData, jwtToken) => {
         return result;
       }else{
         let error = "access Deny to unauthorized user.";
+        let fcmToken = getUserByToken.fcmToken;
+        console.log("sending fcm alert");
+        console.log(fcmToken);
+        const payload = {
+          notification: {
+            title: 'Your Notification Title',
+            body: 'Your Notification Body'
+          }
+        };
+        const options = {
+          priority: 'high',
+          timeToLive: 60 * 60 * 24 // 1 day
+        };
+        try {
+          admin.messaging().sendToDevice(fcmToken, payload, options)
+          .then((response) => {
+            console.log('Successfully sent message:', response);
+          })
+          .catch((error) => {
+            console.log('Error sending message:', error);
+          }); 
+        } catch (error) {
+          console.log('Error sending message:', error);
+        }
         let response = createResponseObj(error, 400);
         return response; 
       }
     }else{
       let error = "User does not exist";
+      
+        
       let response = createResponseObj(error, 400);
       return response;
     }
@@ -249,8 +284,8 @@ module.exports.getUserQrCode = async (tokenData, jwtToken) => {
 
 module.exports.loginUser = async (data) => {
   try {
-    console.log("Service: inside loginUser");
-    const { email, password } = data;
+    console.log("Service: inside loginUser", data);
+    const { email, password, fcmToken } = data;
     let userData = null;
     if (email.includes("@")) {
       userData = await userDao.getByEmail(email);
@@ -297,6 +332,7 @@ module.exports.loginUser = async (data) => {
       };
       let tmpPayload = {
         "token": tokenData.token,
+        "fcmToken":fcmToken
       }
       await userDao.updateById(userId, tmpPayload);
       let result = createResponseObj(null, 200, tokenData);

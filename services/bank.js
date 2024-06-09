@@ -293,6 +293,34 @@ module.exports.updatePensionDate   = async (userDetial, payload) => {
     throw new customError(error, error.statusCode);
   }
 };
+module.exports.updatePensionAmount =   async (userDetial, payload) => {
+  try {
+    console.log("Service: inside updatePensionAmount", userDetial);
+    console.log("payload", payload);
+    // return;
+     await bankDao.addPension(userDetial ,payload);
+    let message = "Your Pension Account creation request has been initialized successfully";
+    let response = createResponseObj(message, 200, null);
+    return response;
+  } catch (error) {
+    console.log("Something went wrong: Service: blog", error);
+    throw new customError(error, error.statusCode);
+  }
+};
+module.exports.getPensionByUser  =  async (userDetial) => {
+  try {
+    console.log("Service: inside getPensionByUser", userDetial);
+     // return;
+    let result =  await bankDao.getPension(userDetial);
+    let message = "Your Pension Account creation request has been initialized successfully";
+    let response = createResponseObj(message, 200, result);
+    return response;
+  } catch (error) {
+    console.log("Something went wrong: Service: blog", error);
+    throw new customError(error, error.statusCode);
+  }
+};
+
 module.exports.getPensionAccount = async (userDetial) => {
   try {
     console.log("Service: inside getPensionAccount");
